@@ -3,12 +3,12 @@
 Data-driven MPC tuning of:
 
  * MPC weight matrices
- * MPC sampling time T\_{MPC}
+ * MPC sampling time T_{s}^{MPC}
  * Prediction and control horizon
  * Kalman filter matrices
  * MPC solver relative and absolute tolerances,
 
-under the constraint that T\_{calc,max} < T\_{MPC} where T\_{calc,max} is the maximum MPC time spent to solve the optimization problem in the simulation.
+under the constraint that T_{calc}^{MPC} < T_{s}^{MPC} where T_{calc}^{MPC} is the maximum MPC time spent to solve the optimization problem.
 This constraints means that the controller can run in real-time.
 
 ## Usage 
