@@ -1,4 +1,4 @@
-# pyMPC_BO
+# Efficient Calibration for Embedded MPC
 
 This code performs an efficient data-driven MPC calibration by tuning:
 
@@ -11,7 +11,7 @@ This code performs an efficient data-driven MPC calibration by tuning:
 to optimize a closed-loop objective function J^{cl}, under the constraint that T_{calc}^{MPC} <= \eta T_{s}^{MPC} where T_{calc}^{MPC} is the maximum MPC time spent to solve the optimization problem.
 Satisfying this constraints means that the controller can run in real-time.
 
-## Usage 
+## Main scripts: 
 
 The main script to be executed for MPC calibration is
 
