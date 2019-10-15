@@ -1,15 +1,15 @@
 # pyMPC_BO
 
-Data-driven MPC tuning of:
+This code performs an efficient data-driven MPC calibration by tuning:
 
  * MPC weight matrices
  * MPC sampling time T_{s}^{MPC}
  * Prediction and control horizon
  * Kalman filter matrices
- * MPC solver relative and absolute tolerances,
+ * MPC solver relative and absolute tolerances
 
-under the constraint that T_{calc}^{MPC} < T_{s}^{MPC} where T_{calc}^{MPC} is the maximum MPC time spent to solve the optimization problem.
-This constraints means that the controller can run in real-time.
+to optimize a closed-loop objective function J^{cl}, under the constraint that T_{calc}^{MPC} <= \eta T_{s}^{MPC} where T_{calc}^{MPC} is the maximum MPC time spent to solve the optimization problem.
+Satisfying this constraints means that the controller can run in real-time.
 
 ## Usage 
 
@@ -17,12 +17,12 @@ The main script to be executed for MPC calibration is
 
 `` BO_IDW_main.py``
 
-The results of the Bayesian Optimization are saved in the results_*.pkl file
+The results of the MPC calibration are saved in the results_*.pkl file
  on the disk and are read by the script
 
 ``BO_analysis.py``
 
-that generates relevant plots
+that produces the relevant plots.
 ## Other files:
  * ``pendulum_model.py``: dynamic equations of the pendulum 
  * ``pendulum_MPC_sim``: performs a single closed-loop MPC simulation
