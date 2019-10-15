@@ -30,7 +30,7 @@ that generates relevant plots
  * ``kalman.py``: implements a kalman filter
 
 ## Othe folders:
- * ``pyMPC``: containts the pyMPC MPC library. Copied from the repository <https://github.com/forgi86/pyMPC.git>, branch dev-BO
+ * ``pyMPC``: containts the pyMPC MPC library. Copied from the branch dev-BO of repository <https://github.com/forgi86/pyMPC.git>, 
  * ``idwgopt``: contains the idwgopt package version 1.2, copied from <http://cse.lab.imtlucca.it/~bemporad/idwgopt/> 
 ## Dependencies:
 
