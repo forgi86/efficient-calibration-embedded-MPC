@@ -52,9 +52,9 @@ QDu_def = 1e-5/(Ts_MPC_def**2) * sparse.eye(1)       # Quadratic cost for Du0, D
 DEFAULTS_PENDULUM_MPC = {
     'xref_fun': xref_fun_def,
     'uref':  np.array([0.0]), # N
-    'std_npos': 0.004,  # m
-    'std_nphi': 0.004,  # rad
-    'std_dF': 0.2,  # N
+    'std_npos': 0.02,  # m
+    'std_nphi': 0.01,  # rad
+    'std_dF': 0.1,  # N
     'w_F': 10,  # rad
     'len_sim': 40, #s
 
