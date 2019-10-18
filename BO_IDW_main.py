@@ -10,7 +10,7 @@ import numba as nb
 
 if __name__ == '__main__':
 
-    np.random.seed(0)     # initialize seed for reproducibility
+    np.random.seed(42)     # initialize seed for reproducibility
 
     # optimization parameters
     # Run the optimization
@@ -53,29 +53,29 @@ if __name__ == '__main__':
     x0 = dict_to_x(dict_x0)
 
     bounds = [
-        {'name': 'Qy_scale', 'type': 'continuous', 'domain': (1e-6, 1)},  # 0
-        {'name': 'Qu_scale', 'type': 'continuous', 'domain': (0, 1e-12)},  # 1
-        {'name': 'QDu_scale', 'type': 'continuous', 'domain': (1e-6, 1)},  # 2
-        {'name': 'Qy11', 'type': 'continuous', 'domain': (0, 1)},  # 3
-        {'name': 'Qy22', 'type': 'continuous', 'domain': (0, 1)},  # 4
+        {'name': 'Qy_scale', 'type': 'continuous', 'domain': (1e-12, 1)},  # 0
+        {'name': 'Qu_scale', 'type': 'continuous', 'domain': (0, 0)},  # 1
+        {'name': 'QDu_scale', 'type': 'continuous', 'domain': (1e-12, 1)},  # 2
+        {'name': 'Qy11', 'type': 'continuous', 'domain': (1e-12, 1)},  # 3
+        {'name': 'Qy22', 'type': 'continuous', 'domain': (1e-12, 1)},  # 4
         {'name': 'Np', 'type': 'continuous', 'domain': (5, 300)},  # 5
         {'name': 'Nc_perc', 'type': 'continuous', 'domain': (0.3, 1)},  # 6
         {'name': 'Ts_MPC', 'type': 'continuous', 'domain': (1e-3, 50e-3)},  # 7
         {'name': 'QP_eps_abs_log', 'type': 'continuous', 'domain': (-7, -1)},  # 8
         {'name': 'QP_eps_rel_log', 'type': 'continuous', 'domain': (-7, -1)},  # 9
-        {'name': 'Q_kal_scale', 'type': 'continuous', 'domain': (0.01, 1)},  # 10
-        {'name': 'R_kal_scale', 'type': 'continuous', 'domain': (0.01, 1)},  # 11
-        {'name': 'Q_kal_11', 'type': 'continuous', 'domain': (1e-6, 1)},  # 12
-        {'name': 'Q_kal_22', 'type': 'continuous', 'domain': (1e-6, 1)},  # 13
-        {'name': 'Q_kal_33', 'type': 'continuous', 'domain': (1e-6, 1)},  # 14
-        {'name': 'Q_kal_44', 'type': 'continuous', 'domain': (1e-6, 1)},  # 15
-        {'name': 'R_kal_11', 'type': 'continuous', 'domain': (1e-6, 1)},  # 16
-        {'name': 'R_kal_22', 'type': 'continuous', 'domain': (1e-6, 1)},  # 17
+        {'name': 'Q_kal_scale', 'type': 'continuous', 'domain': (1e-12, 1)},  # 10
+        {'name': 'R_kal_scale', 'type': 'continuous', 'domain': (1e-12, 1)},  # 11
+        {'name': 'Q_kal_11', 'type': 'continuous', 'domain': (1e-12, 1)},  # 12
+        {'name': 'Q_kal_22', 'type': 'continuous', 'domain': (1e-12, 1)},  # 13
+        {'name': 'Q_kal_33', 'type': 'continuous', 'domain': (1e-12, 1)},  # 14
+        {'name': 'Q_kal_44', 'type': 'continuous', 'domain': (1e-12, 1)},  # 15
+        {'name': 'R_kal_11', 'type': 'continuous', 'domain': (1e-12, 1)},  # 16
+        {'name': 'R_kal_22', 'type': 'continuous', 'domain': (1e-12, 1)},  # 17
 
     ]
 
     constraints = [
-        {'name': 'min_time', 'constraint': '-x[:,5]*x[:,7] + 0.1'},
+        #{'name': 'min_time', 'constraint': '-x[:,5]*x[:,7] + 0.1'}, # minimum prediction horizon in seconds
         # {'name': 'MPC_scale_norm_1', 'constraint': 'x[:,0] + x[:,1] + x[:,2] -1.1'},
         # {'name': 'MPC_scale_norm_2', 'constraint': '-x[:,0] -x[:,1] -x[:,2] +0.9'},
         # {'name': 'Qy_sum_1', 'constraint': 'x[:,3] + x[:,4] - 1.1'},
@@ -128,7 +128,7 @@ if __name__ == '__main__':
         problem = idwgopt.idwgopt.default(nvars)
         problem["nsamp"] = n_init
         problem["maxevals"] = max_iter
-        problem["g"] = lambda x: np.array([-x[5] * x[7] + 0.1])
+        #problem["g"] = lambda x: np.array([-x[5] * x[7] + 0.1])
         problem["lb"] = lb
         problem["ub"] = ub
         problem["f"] = f_x_calc

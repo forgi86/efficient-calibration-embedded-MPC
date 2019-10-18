@@ -55,7 +55,7 @@ DEFAULTS_PENDULUM_MPC = {
     'std_npos': 0.02,  # m
     'std_nphi': 0.01,  # rad
     'std_dF': 0.1,  # N
-    'w_F': 10,  # rad
+    'w_F': 5,  # rad/s
     'len_sim': 40, #s
 
     'Ac': Ac_def,

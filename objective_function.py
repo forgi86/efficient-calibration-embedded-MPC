@@ -166,10 +166,12 @@ def f_x(x, eps_calc=1.0, seed_val=None):
         #J_perf = 2e1
         #J_fit = 2e1
 
-    print(f"N_eval: {N_eval}, J_perf:{J_perf:.2f}, J_calc:{J_calc:.2f}, J_emergency:{J_emergency:.2f}" )
+    J = np.log(J_perf) + np.log(1+J_calc+J_emergency)
+
+    print(f"N_eval: {N_eval}, J_perf:{J_perf:.2f}, J_calc:{J_calc:.2f}, J_emergency:{J_emergency:.2f}, J:{J:.2f}" )
     N_eval += 1
 
-    return np.log(J_perf) + np.log(1+J_calc+J_emergency)  #+ J_fit
+    return J
 
 
 if __name__ == '__main__':

@@ -6,7 +6,7 @@ This code performs an efficient data-driven MPC calibration by tuning:
  * MPC sampling time T_{s}^{MPC}
  * Prediction and control horizon
  * Kalman filter matrices
- * MPC solver relative and absolute tolerances
+ * QP solver relative and absolute tolerances
 
 to optimize a closed-loop objective function J^{cl}, under the constraint that T_{calc}^{MPC} <= \eta T_{s}^{MPC} where T_{calc}^{MPC} is the maximum MPC time spent to solve the optimization problem.
 Satisfying this constraints means that the controller can run in real-time.

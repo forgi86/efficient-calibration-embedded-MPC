@@ -11,7 +11,7 @@ if __name__ == '__main__':
 
     algo = 'IDWGOPT'
 
-    machine = 'PI'#'PC'
+    machine = 'PC'#'PI'
     eps_calc = 1.0
     iter_max_plot = 500
 
@@ -61,7 +61,7 @@ if __name__ == '__main__':
     fig, axes = plt.subplots(3, 1, figsize=(8, 6))
     #    axes[0].plot(t, y_meas[:, 0], "r", label='p_meas')
     axes[0].plot(t_fast, x_fast[:, 0], "k", label='$p$')
-    axes[0].plot(t, y_ref[:, 0], "r--", label="$p^{ref}$", linewidth=2)
+    axes[0].plot(t, y_ref[:, 0], "r--", label="$p^{\mathrm{ref}}$", linewidth=2)
     axes[0].set_ylim(-0.2, 1.0)
     axes[0].set_ylabel("Position (m)")
 
