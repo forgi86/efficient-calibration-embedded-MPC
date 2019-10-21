@@ -1,3 +1,8 @@
+import os
+import matplotlib
+if os.name == 'posix' and "DISPLAY" not in os.environ:
+    matplotlib.use("Agg")
+
 import numpy as np
 from pendulum_MPC_sim import simulate_pendulum_MPC, get_parameter
 from numpy.random import seed
@@ -9,9 +14,11 @@ import os
 from scipy.interpolate import interp1d
 if __name__ == '__main__':
 
-    algo = 'IDWGOPT'
+    algo = 'GLIS'
+    #algo = 'BO'
 
-    machine = 'PC'#'PI'
+    #machine = 'PC'
+    machine = 'PI'
     eps_calc = 1.0
     iter_max_plot = 500
 
@@ -59,20 +66,20 @@ if __name__ == '__main__':
     t_calc = simout['t_calc']
 
     fig, axes = plt.subplots(3, 1, figsize=(8, 6))
-    #    axes[0].plot(t, y_meas[:, 0], "r", label='p_meas')
+#    axes[0].plot(t, y_meas[:, 0], "r", label='p_meas')
     axes[0].plot(t_fast, x_fast[:, 0], "k", label='$p$')
-    axes[0].plot(t, y_ref[:, 0], "r--", label="$p^{\mathrm{ref}}$", linewidth=2)
+    axes[0].plot(t, y_ref[:, 0], "r--", label="$p^{ref}$", linewidth=2)
     axes[0].set_ylim(-0.2, 1.0)
     axes[0].set_ylabel("Position (m)")
 
-    #    axes[1].plot(t, y_meas[:, 1] * RAD_TO_DEG, "r", label='phi_meas')
+#    axes[1].plot(t, y_meas[:, 1] * RAD_TO_DEG, "r", label='phi_meas')
     axes[1].plot(t_fast, x_fast[:, 2] * RAD_TO_DEG, 'k', label="$\phi$")
     idx_pred = 0
     axes[1].set_ylim(-12, 12)
     axes[1].set_ylabel("Angle (deg)")
 
     axes[2].plot(t, u[:, 0], 'k', label="u")
-    # axes[2].plot(t, uref * np.ones(np.shape(t)), "r--", label="u_ref")
+    #axes[2].plot(t, uref * np.ones(np.shape(t)), "r--", label="u_ref")
     axes[2].set_ylim(-8, 8)
     axes[2].set_ylabel("Force (N)")
     axes[2].set_xlabel("Simulation time (s)")
@@ -98,11 +105,11 @@ if __name__ == '__main__':
     axes[1].step(t, t_calc[:, 0] * 1e3, "b", where='post', label='T_MPC')
     axes[1].set_xlabel("Simulation time (s)")
     axes[1].set_ylabel("MPC time (ms)")
-    axes[1].set_ylim(0, 4)
+    axes[1].set_ylim(0, 40)
     axes[2].step(t_fast[1:], t_int[1:, 0] * 1e3, "b", where='post', label='T_ODE')
     axes[2].set_xlabel("Simulation time (s)")
     axes[2].set_ylabel("ODE time (ms)")
-    axes[2].set_ylim(0, 0.3)
+    axes[2].set_ylim(0, 2)
     axes[3].step(t, u[:, 0], where='post', label="F")
     axes[3].step(t_fast, u_fast[:, 0], where='post', label="F_d")
     axes[3].set_xlabel("Simulation time (s)")
@@ -111,6 +118,10 @@ if __name__ == '__main__':
     for ax in axes:
         ax.grid(True)
         ax.legend()
+
+    fig_name = f"MPC_CPUTIME_{algo}_{machine}.pdf"
+    fig_path = os.path.join(FIG_FOLDER, fig_name)
+    fig.savefig(fig_path, bbox_inches='tight')
 
     # In[Iteration plot]
 
@@ -132,8 +143,8 @@ if __name__ == '__main__':
     N = len(Y)
     iter = np.arange(1, N + 1, dtype=np.int)
     axes[0].plot(iter, Y, 'k*', label='Current test point')
-#    axes[0].plot(iter, Y_best_curr, 'r', label='Current best point')
-    axes[0].plot(iter, Y_best_val*np.ones(Y.shape), '-', label='Overall best point', color='red')
+    #    axes[0].plot(iter, Y_best_curr, 'r', label='Current best point')
+    axes[0].plot(iter, Y_best_val * np.ones(Y.shape), '-', label='Overall best point', color='red')
     axes[0].set_xlabel("Iteration index n (-)")
     axes[0].set_ylabel(r"Performance cost $\tilde {J}^{\mathrm{cl}}$")
 
@@ -147,6 +158,7 @@ if __name__ == '__main__':
     fig_name = f"ITER_{algo}_{machine}.pdf"
     fig_path = os.path.join(FIG_FOLDER, fig_name)
     fig.savefig(fig_path, bbox_inches='tight')
+
 
     # In[Recompute optimum]
     J_opt = f_x(x_opt, eps_calc=results['eps_calc'])

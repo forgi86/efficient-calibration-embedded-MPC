@@ -1,3 +1,8 @@
+import os
+import matplotlib
+
+if os.name == 'posix' and "DISPLAY" not in os.environ:
+    matplotlib.use("Agg")
 import GPyOpt
 import idwgopt.idwgopt
 import numpy as np
@@ -10,23 +15,22 @@ import numba as nb
 
 if __name__ == '__main__':
 
-    np.random.seed(42)     # initialize seed for reproducibility
+    np.random.seed(10)
+    # initial random points
 
     # optimization parameters
     # Run the optimization
-    # n_init = 10 changed to 2*n_var
-    max_iter = 500  # function evaluation budget
+    # n_init = 10 changed to 2*n_var (GLIS default choice)
+    max_iter = 500  # evaluation budget
     max_time = np.inf  # time budget
-    eps = 0.0  # Minimum allows distance between the last two observations (For Bayesian Optimization)
-    eps_calc = 1.0 # Simulate results on a machine eps_calc times slower
+    eps = 0.0  # Minimum allows distance between the las two observations
+    eps_calc = 1.0
 
     # method = 'BO'
-    method = "IDWGOPT"
+    method = "GLIS"
     machine = 'PC'
 
     dict_x0 = {
-        'Qy_scale': 0.9,
-        'Qu_scale': 0.0,
         'QDu_scale': 0.1,
         'Qy11': 0.1,
         'Qy22': 0.9,
@@ -35,12 +39,10 @@ if __name__ == '__main__':
         'Ts_MPC': 25e-3,
         'QP_eps_abs_log': -3,
         'QP_eps_rel_log': -2,
-        'Q_kal_scale': 0.5,
         'Q_kal_11': 0.1,
         'Q_kal_22': 0.4,
         'Q_kal_33': 0.1,
         'Q_kal_44': 0.4,
-        'R_kal_scale': 0.5,
         'R_kal_11': 0.5,
         'R_kal_22': 0.5
     }
@@ -53,39 +55,24 @@ if __name__ == '__main__':
     x0 = dict_to_x(dict_x0)
 
     bounds = [
-        {'name': 'Qy_scale', 'type': 'continuous', 'domain': (1e-12, 1)},  # 0
-        {'name': 'Qu_scale', 'type': 'continuous', 'domain': (0, 0)},  # 1
-        {'name': 'QDu_scale', 'type': 'continuous', 'domain': (1e-12, 1)},  # 2
-        {'name': 'Qy11', 'type': 'continuous', 'domain': (1e-12, 1)},  # 3
-        {'name': 'Qy22', 'type': 'continuous', 'domain': (1e-12, 1)},  # 4
-        {'name': 'Np', 'type': 'continuous', 'domain': (5, 300)},  # 5
-        {'name': 'Nc_perc', 'type': 'continuous', 'domain': (0.3, 1)},  # 6
-        {'name': 'Ts_MPC', 'type': 'continuous', 'domain': (1e-3, 50e-3)},  # 7
-        {'name': 'QP_eps_abs_log', 'type': 'continuous', 'domain': (-7, -1)},  # 8
-        {'name': 'QP_eps_rel_log', 'type': 'continuous', 'domain': (-7, -1)},  # 9
-        {'name': 'Q_kal_scale', 'type': 'continuous', 'domain': (1e-12, 1)},  # 10
-        {'name': 'R_kal_scale', 'type': 'continuous', 'domain': (1e-12, 1)},  # 11
-        {'name': 'Q_kal_11', 'type': 'continuous', 'domain': (1e-12, 1)},  # 12
-        {'name': 'Q_kal_22', 'type': 'continuous', 'domain': (1e-12, 1)},  # 13
-        {'name': 'Q_kal_33', 'type': 'continuous', 'domain': (1e-12, 1)},  # 14
-        {'name': 'Q_kal_44', 'type': 'continuous', 'domain': (1e-12, 1)},  # 15
-        {'name': 'R_kal_11', 'type': 'continuous', 'domain': (1e-12, 1)},  # 16
-        {'name': 'R_kal_22', 'type': 'continuous', 'domain': (1e-12, 1)},  # 17
-
+        {'name': 'QDu_scale', 'type': 'continuous', 'domain': (1e-16, 1)},  # 0
+        {'name': 'Qy11', 'type': 'continuous', 'domain': (1e-16, 1)},  # 1
+        {'name': 'Qy22', 'type': 'continuous', 'domain': (1e-16, 1)},  # 2
+        {'name': 'Np', 'type': 'continuous', 'domain': (5, 300)},  # 3
+        {'name': 'Nc_perc', 'type': 'continuous', 'domain': (0.3, 1)},  # 4
+        {'name': 'Ts_MPC', 'type': 'continuous', 'domain': (1e-3, 50e-3)},  # 5
+        {'name': 'QP_eps_abs_log', 'type': 'continuous', 'domain': (-7, -1)},  # 6
+        {'name': 'QP_eps_rel_log', 'type': 'continuous', 'domain': (-7, -1)},  # 7
+        {'name': 'Q_kal_11', 'type': 'continuous', 'domain': (1e-16, 1)},  # 8
+        {'name': 'Q_kal_22', 'type': 'continuous', 'domain': (1e-16, 1)},  # 9
+        {'name': 'Q_kal_33', 'type': 'continuous', 'domain': (1e-16, 1)},  # 10
+        {'name': 'Q_kal_44', 'type': 'continuous', 'domain': (1e-16, 1)},  # 11
+        {'name': 'R_kal_11', 'type': 'continuous', 'domain': (1e-16, 1)},  # 12
+        {'name': 'R_kal_22', 'type': 'continuous', 'domain': (1e-16, 1)},  # 13
     ]
 
     constraints = [
-        #{'name': 'min_time', 'constraint': '-x[:,5]*x[:,7] + 0.1'}, # minimum prediction horizon in seconds
-        # {'name': 'MPC_scale_norm_1', 'constraint': 'x[:,0] + x[:,1] + x[:,2] -1.1'},
-        # {'name': 'MPC_scale_norm_2', 'constraint': '-x[:,0] -x[:,1] -x[:,2] +0.9'},
-        # {'name': 'Qy_sum_1', 'constraint': 'x[:,3] + x[:,4] - 1.1'},
-        # {'name': 'Qy_sum_2', 'constraint': '-x[:,3] -x[:,4] +0.9'},
-        # {'name': 'KAL_scale_norm_1', 'constraint': 'x[:,10] + x[:,11]  -1.1'},
-        # {'name': 'KAL_scale_norm_2', 'constraint': '-x[:,10] -x[:,11]  +0.9'},
-        # {'name': 'Q_KAL_sum_1', 'constraint': 'x[:,12] + x[:,13] + x[:,14] + x[:,15]  -1.1'},
-        # {'name': 'Q_KAL_sum_2', 'constraint': '-x[:,12] -x[:,13] -x[:,14] -x[:,15]  +0.9'},
-        # {'name': 'R_KAL_sum_1', 'constraint': 'x[:,16] + x[:,17]  -1.1'},
-        # {'name': 'R_KAL_sum_2', 'constraint': '-x[:,16] -x[:,17]  +0.9'},
+        # {'name': 'min_time', 'constraint': '-x[:,4]*x[:,6] + 0.1'}, # prediction horizon in seconds large enough
     ]
 
 
@@ -95,6 +82,7 @@ if __name__ == '__main__':
 
     feasible_region = GPyOpt.Design_space(space=bounds,
                                           constraints=constraints)  # , constraints=constraints_context)
+    #    unfeasible_region = GPyOpt.Design_space(space=bounds)
     X_init = GPyOpt.experiment_design.initial_design('random', feasible_region, n_init)
 
     time_optimization_start = time.perf_counter()
@@ -115,7 +103,7 @@ if __name__ == '__main__':
         J_sample = myBopt.Y
         idx_opt = np.argmin(J_sample)
 
-    if method == "IDWGOPT":
+    if method == "GLIS":
 
         # IDWGOPT initialization
         nvars = len(bounds)
@@ -128,7 +116,7 @@ if __name__ == '__main__':
         problem = idwgopt.idwgopt.default(nvars)
         problem["nsamp"] = n_init
         problem["maxevals"] = max_iter
-        #problem["g"] = lambda x: np.array([-x[5] * x[7] + 0.1])
+        #        problem["g"] = lambda x: np.array([-x[5]*x[7]+0.1])
         problem["lb"] = lb
         problem["ub"] = ub
         problem["f"] = f_x_calc
@@ -246,7 +234,7 @@ if __name__ == '__main__':
                    'myBopt': myBopt, 'method': method
                    }
 
-    if method == 'IDWGOPT':
+    if method == 'GLIS':
         results = {'X_sample': X_sample, 'J_sample': J_sample,
                    'idx_opt': idx_opt, 'x_opt': x_opt, 'J_opt': J_opt,
                    'eps_calc': eps_calc,
@@ -259,3 +247,5 @@ if __name__ == '__main__':
 
     with open(res_filename, "wb") as file:
         pickle.dump(results, file)
+
+

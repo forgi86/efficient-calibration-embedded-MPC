@@ -5,9 +5,7 @@ from pendulum_model import *
 
 N_eval = 0
 
-VAR_NAMES = ['Qy_scale',
-             'Qu_scale',
-             'QDu_scale',
+VAR_NAMES = ['QDu_scale',
              'Qy11',
              'Qy22',
              'Np',
@@ -15,20 +13,19 @@ VAR_NAMES = ['Qy_scale',
              'Ts_MPC',
              'QP_eps_abs_log',
              'QP_eps_rel_log',
-             'Q_kal_scale',
              'Q_kal_11',
              'Q_kal_22',
              'Q_kal_33',
              'Q_kal_44',
-             'R_kal_scale',
              'R_kal_11',
              'R_kal_22',
              ]
 
+
 def dict_to_x(dict_x):
     N_vars1 = len(dict_x)
     N_vars2 = len(VAR_NAMES)
-    assert(N_vars1 == N_vars2)
+    assert (N_vars1 == N_vars2)
     N_vars = N_vars1
 
     x = np.zeros(N_vars)
@@ -36,12 +33,13 @@ def dict_to_x(dict_x):
         x[var_idx] = dict_x[VAR_NAMES[var_idx]]
     return x
 
+
 def x_to_dict(x):
     if len(x.shape) == 2:
         x = x[0]
     N_vars1 = len(x)
     N_vars2 = len(VAR_NAMES)
-    assert(N_vars1 == N_vars2)
+    assert (N_vars1 == N_vars2)
     N_vars = N_vars1
 
     dict_x = {}
@@ -51,59 +49,50 @@ def x_to_dict(x):
 
 
 def get_simoptions_x(x):
+    so = x_to_dict(x)  # simopt
 
-    so = x_to_dict(x) # simopt
-
-    # MPC weights
-    sum_MPC_scale = so['Qy_scale'] + so['Qu_scale'] + so['QDu_scale']
-    sum_MPC_Qy = so['Qy11'] + so['Qy22']
-    
-    Qx =  so['Qy_scale']/sum_MPC_scale*sparse.diags([so['Qy11'], 0, so['Qy22'], 0])/sum_MPC_Qy   # Quadratic cost for states x0, x1, ..., x_N-1
+    # MPC cost: weight matrices
+    Qx = sparse.diags([so['Qy11'], 0, so['Qy22'], 0])  # /sum_MPC_Qy   # Quadratic cost for states x0, x1, ..., x_N-1
     QxN = Qx
-    Qu = so['Qu_scale']/sum_MPC_scale*sparse.eye(1)        # Quadratic cost for u0, u1, ...., u_N-1
-    QDu = so['QDu_scale']/sum_MPC_scale*sparse.eye(1)       # Quadratic cost for Du0, Du1, ...., Du_N-1
+    QDu = so['QDu_scale'] * sparse.eye(1)  # Quadratic cost for Du0, Du1, ...., Du_N-1
 
     so['Qx'] = Qx
     so['QxN'] = QxN
-    so['Qu'] = Qu
+    so['Qu'] = 0.0 * sparse.eye(1)
     so['QDu'] = QDu
 
-    so['Nc'] = np.int(round(so['Np'] * so['Nc_perc']))
+    # MPC cost: prediction and control horizon
     so['Np'] = np.int(round(so['Np']))
+    so['Nc'] = np.int(round(so['Np'] * so['Nc_perc']))
 
+    # MPC cost: sample time
     # Make Ts_MPC a multiple of Ts_fast
     Ts_MPC = so['Ts_MPC']
-    Ts_MPC = ((Ts_MPC // Ts_fast)) * Ts_fast # make Ts_MPC an integer multiple of Ts_fast
+    Ts_MPC = ((Ts_MPC // Ts_fast)) * Ts_fast  # make Ts_MPC an integer multiple of Ts_fast
     so['Ts_MPC'] = Ts_MPC
 
-    # Solver settings
-    so['QP_eps_abs'] = 10**so['QP_eps_abs_log']
-    so['QP_eps_rel'] = 10**so['QP_eps_rel_log']
+    # MPC: solver settings
+    so['QP_eps_abs'] = 10 ** so['QP_eps_abs_log']
+    so['QP_eps_rel'] = 10 ** so['QP_eps_rel_log']
 
-    # Kalman weights
-    sum_KAL_scale = so['Q_kal_scale'] + so['R_kal_scale']
-    sum_KAL_Q = so['Q_kal_11'] + so['Q_kal_22'] + so['Q_kal_33'] + so['Q_kal_44']
-    sum_KAL_R = so['R_kal_11'] + so['R_kal_22'] 
-
-    
-    Q_kal = so['Q_kal_scale']/sum_KAL_scale * np.diag([so['Q_kal_11'],so['Q_kal_22'],so['Q_kal_33'],so['Q_kal_44']])/sum_KAL_Q
-    R_kal = so['R_kal_scale']/sum_KAL_scale * np.diag([so['R_kal_11'],so['R_kal_22']])/sum_KAL_R
+    # Kalman filter: matrices
+    Q_kal = np.diag([so['Q_kal_11'], so['Q_kal_22'], so['Q_kal_33'], so['Q_kal_44']])
+    R_kal = np.diag([so['R_kal_11'], so['R_kal_22']])
 
     so['Q_kal'] = Q_kal
     so['R_kal'] = R_kal
 
     # Fixed simulation settings
-    so['std_nphi'] = 1.0*0.01
-    so['std_npos'] = 1.0*0.02
+    so['std_nphi'] = 0.01
+    so['std_npos'] = 0.02
 
-    so['std_dF'] = 1.0*0.05
+    so['std_dF'] = 0.1
     so['w_F'] = 5
 
     return so
 
 
 def f_x(x, eps_calc=1.0, seed_val=None):
-
     global N_eval
 
     if seed_val is None:
@@ -123,35 +112,28 @@ def f_x(x, eps_calc=1.0, seed_val=None):
         t = simout['t']
         y_meas = simout['y_meas']
         x_ref = simout['x_ref']
-        p_meas  = y_meas[:,0]
-        phi_meas = y_meas[:,1]
+        p_meas = y_meas[:, 0]
+        phi_meas = y_meas[:, 1]
 
-        p_ref = x_ref[:,0]
-        phi_ref = x_ref[:,2]
-        #J_perf = np.log(np.mean(np.abs(pref - p)) + 1) + \
-        #         np.log(10*np.mean(np.abs(np.abs(phi_ref - phi))) + 1)
-        J_perf = 10*np.mean(np.abs(p_ref - p_meas)) + 0.0*np.max(np.abs(p_ref - p_meas)) + \
-                 30*np.mean(np.abs(np.abs(phi_ref - phi_meas))) #+ 15*np.max(np.abs(np.abs(phi_ref - phi_meas)))
+        p_ref = x_ref[:, 0]
+        phi_ref = x_ref[:, 2]
 
+        J_perf = 10 * np.mean(np.abs(p_ref - p_meas)) + 0.0 * np.max(np.abs(p_ref - p_meas)) + \
+                 30 * np.mean(np.abs(np.abs(phi_ref - phi_meas)))  # + 15*np.max(np.abs(np.abs(phi_ref - phi_meas)))
 
-
-        # Computational cost barrier function
-
+        # Computation of the barrier function
         t_calc = simout['t_calc']
-        #eps_calc = 5.0  # actual calculator is eps_calc times slower
         eps_margin = 0.8
-        
-        t_calc = eps_calc*t_calc
+
+        t_calc = eps_calc * t_calc
         t_calc_wc = np.max(t_calc)  # worst-case computational cost (max computational time)
 
         Ts_MPC = simout['Ts_MPC']
         t_available = Ts_MPC * eps_margin
 
-        t_calc_max = Ts_MPC # maximum allowed computational cost
-
-        delay_wc = (t_calc_wc-t_available)
-        delay_wc = delay_wc* (delay_wc >= 0)
-        J_calc = (delay_wc/t_available)*1e3
+        delay_wc = (t_calc_wc - t_available)
+        delay_wc = delay_wc * (delay_wc >= 0)
+        J_calc = (delay_wc / t_available) * 1e3
 
         emergency = simout['emergency_fast']
         emergency_time, _ = np.where(emergency > 0)
@@ -163,47 +145,41 @@ def f_x(x, eps_calc=1.0, seed_val=None):
     else:
         J_perf = 1e3
         J_calc = 1e3
-        #J_perf = 2e1
-        #J_fit = 2e1
+        J_emergency = 1e3  # (len(emergency) - emergency_time[0]) / len(emergency) * 1e3
+        # J_perf = 2e1
+        # J_fit = 2e1
 
-    J = np.log(J_perf) + np.log(1+J_calc+J_emergency)
-
-    print(f"N_eval: {N_eval}, J_perf:{J_perf:.2f}, J_calc:{J_calc:.2f}, J_emergency:{J_emergency:.2f}, J:{J:.2f}" )
+    print(f"N_eval: {N_eval}, J_perf:{J_perf:.2f}, J_calc:{J_calc:.2f}, J_emergency:{J_emergency:.2f}")
     N_eval += 1
 
-    return J
+    return np.log(J_perf) + np.log(1 + J_calc + J_emergency)  # + J_fit
 
 
 if __name__ == '__main__':
 
     import matplotlib.pyplot as plt
-    
+
     dict_x0 = {
 
-               'Qy_scale': 0.999,
-               'Qu_scale': 0.0,
-               'QDu_scale': 0.001,
-               'Qy11': 0.1,
-               'Qy22': 0.5,
-               'Np': 100,
-               'Nc_perc': 0.5,
-               'Ts_MPC': 10e-3,
-               'QP_eps_abs_log': -3,
-               'QP_eps_rel_log': -3,
-               'Q_kal_scale': 0.5,
-               'Q_kal_11': 0.1,
-               'Q_kal_22': 0.9,
-               'Q_kal_33': 0.1,
-               'Q_kal_44': 0.9,
-               'R_kal_scale': 0.5,
-               'R_kal_11': 0.5,
-               'R_kal_22': 0.5
+        'QDu_scale': 0.001,
+        'Qy11': 0.1,
+        'Qy22': 0.5,
+        'Np': 100,
+        'Nc_perc': 0.5,
+        'Ts_MPC': 10e-3,
+        'QP_eps_abs_log': -3,
+        'QP_eps_rel_log': -3,
+        'Q_kal_11': 0.1,
+        'Q_kal_22': 0.9,
+        'Q_kal_33': 0.1,
+        'Q_kal_44': 0.9,
+        'R_kal_11': 0.5,
+        'R_kal_22': 0.5
     }
     x0 = dict_to_x(dict_x0)
 
     f_x0 = x_to_dict(x0)
     J_tot = f_x(x0)
-
 
     simopt = get_simoptions_x(x0)
     simout = simulate_pendulum_MPC(simopt)
@@ -220,19 +196,19 @@ if __name__ == '__main__':
     y_ref = x_ref[:, [0, 2]]  # on-line predictions from the Kalman Filter
     uref = get_parameter({}, 'uref')
 
-    fig,axes = plt.subplots(3,1, figsize=(10,10))
-    axes[0].plot(t, y_meas[:,0], "b", label='p_meas')
-    axes[0].plot(t, y[:,0], "k", label='p')
-    axes[0].plot(t, y_ref[:,0], "k--", label="p_ref")
+    fig, axes = plt.subplots(3, 1, figsize=(10, 10))
+    axes[0].plot(t, y_meas[:, 0], "b", label='p_meas')
+    axes[0].plot(t, y[:, 0], "k", label='p')
+    axes[0].plot(t, y_ref[:, 0], "k--", label="p_ref")
     axes[0].set_title("Position (m)")
 
-    axes[1].plot(t, y_meas[:,1]*RAD_TO_DEG, "b", label='phi_meas')
-    axes[1].plot(t, y[:,1]*RAD_TO_DEG, 'k',label="phi")
-    axes[1].plot(t, y_ref[:,1]*RAD_TO_DEG, "k--", label="phi_ref")
+    axes[1].plot(t, y_meas[:, 1] * RAD_TO_DEG, "b", label='phi_meas')
+    axes[1].plot(t, y[:, 1] * RAD_TO_DEG, 'k', label="phi")
+    axes[1].plot(t, y_ref[:, 1] * RAD_TO_DEG, "k--", label="phi_ref")
     axes[1].set_title("Angle (deg)")
 
-    axes[2].plot(t, u[:,0], label="u")
-    axes[2].plot(t, uref*np.ones(np.shape(t)), "r--", label="u_ref")
+    axes[2].plot(t, u[:, 0], label="u")
+    axes[2].plot(t, uref * np.ones(np.shape(t)), "r--", label="u_ref")
     axes[2].set_title("Force (N)")
 
     for ax in axes:
@@ -242,10 +218,9 @@ if __name__ == '__main__':
     default = get_default_parameters(simopt)
 
     t_calc = simout['t_calc']
-    fig,ax = plt.subplots(1,1, figsize=(5,5))
-    plt.hist(t_calc*1e3)
+    fig, ax = plt.subplots(1, 1, figsize=(5, 5))
+    plt.hist(t_calc * 1e3)
     plt.title("Computation time (ms)")
-
 
     t_int = simout['t_int_fast']
     t_fast = simout['t_fast']
