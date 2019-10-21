@@ -15,12 +15,12 @@ Satisfying this constraints means that the controller can run in real-time.
 
 The main script to be executed for MPC calibration is
 
-`` BO_IDW_main.py``
+`` GLIS_BO_main.py``
 
 The results of the MPC calibration are saved in the results_*.pkl file
  on the disk and are read by the script
 
-``BO_analysis.py``
+``GLIS_BO_analysis.py``
 
 that produces the relevant plots.
 ## Other files:
@@ -31,10 +31,10 @@ that produces the relevant plots.
 
 ## Included dependencies:
  * ``pyMPC``: containts the pyMPC library for Model Predictive Control. Copied from branch dev-BO of my repository <https://github.com/forgi86/pyMPC.git>, 
- * ``idwgopt``: contains the idwgopt package version 1.1. Copied from <http://cse.lab.imtlucca.it/~bemporad/idwgopt/> 
+ * ``idwgopt``: contains the python version of the GLIS package version 1.1. Copied from <http://cse.lab.imtlucca.it/~bemporad/glis/> 
 ## Other dependencies:
 
-Simulations performed on a Python 3.6 conda environment with
+Simulations were performed on a Python 3.6 conda environment with
 
  * numpy
  * scipy
