@@ -29,6 +29,7 @@ if __name__ == '__main__':
     # method = 'BO'
     method = "GLIS"
     machine = 'PC'
+    #machine = 'PI'
 
     dict_x0 = {
         'QDu_scale': 0.1,

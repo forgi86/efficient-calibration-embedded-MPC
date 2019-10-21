@@ -17,8 +17,8 @@ if __name__ == '__main__':
     algo = 'GLIS'
     #algo = 'BO'
 
-    #machine = 'PC'
-    machine = 'PI'
+    machine = 'PC'
+    #machine = 'PI'
     eps_calc = 1.0
     iter_max_plot = 500
 
