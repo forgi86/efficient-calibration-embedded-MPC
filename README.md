@@ -29,10 +29,10 @@ that produces the relevant plots.
  * ``objective_function.py``: objective function
  * ``kalman.py``: implements a kalman filter
 
-## Other folders:
+## Included dependencies:
  * ``pyMPC``: containts the pyMPC library for Model Predictive Control. Copied from branch dev-BO of my repository <https://github.com/forgi86/pyMPC.git>, 
  * ``idwgopt``: contains the idwgopt package version 1.1. Copied from <http://cse.lab.imtlucca.it/~bemporad/idwgopt/> 
-## Dependencies:
+## Other dependencies:
 
 Simulations performed on a Python 3.6 conda environment with
 
