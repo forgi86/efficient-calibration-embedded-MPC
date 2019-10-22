@@ -6,7 +6,7 @@ def init(prob):
     """
     
     from pyDOE import lhs #https://pythonhosted.org/pyDOE/
-    import nlopt # https://nlopt.readthedocs.io
+    # import nlopt # https://nlopt.readthedocs.io
     from pyswarm import pso # https://pythonhosted.org/pyswarm/
 
     from scipy.optimize import linprog as linprog
