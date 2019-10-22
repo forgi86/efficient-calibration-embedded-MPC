@@ -15,7 +15,7 @@ import numba as nb
 
 if __name__ == '__main__':
 
-    np.random.seed(10)
+    np.random.seed(2)
     # initial random points
 
     # optimization parameters
@@ -28,8 +28,8 @@ if __name__ == '__main__':
 
     # method = 'BO'
     method = "GLIS"
-    machine = 'PC'
-    #machine = 'PI'
+    machine = 'PI' # PC or PI
+
 
     dict_x0 = {
         'QDu_scale': 0.1,

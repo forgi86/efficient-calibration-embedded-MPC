@@ -17,8 +17,7 @@ if __name__ == '__main__':
     algo = 'GLIS'
     #algo = 'BO'
 
-    machine = 'PC'
-    #machine = 'PI'
+    machine = 'PI' # PC or PI
     eps_calc = 1.0
     iter_max_plot = 500
 
@@ -153,7 +152,7 @@ if __name__ == '__main__':
         ax.legend(loc='upper right')
 
     axes[0].set_xlim((0, iter_max_plot))
-    axes[0].set_ylim((-1, 19))
+    axes[0].set_ylim((-1, 25))
 
     fig_name = f"ITER_{algo}_{machine}.pdf"
     fig_path = os.path.join(FIG_FOLDER, fig_name)
@@ -161,8 +160,10 @@ if __name__ == '__main__':
 
 
     # In[Recompute optimum]
+    #print(Y_best_val)
+
     J_opt = f_x(x_opt, eps_calc=results['eps_calc'])
-    print(J_opt)
+    #print(J_opt)
 
     # In[Optimization computation time]
 
