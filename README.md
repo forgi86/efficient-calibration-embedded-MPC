@@ -1,6 +1,8 @@
-# Efficient Calibration for Embedded MPC
+# Efficient Calibration of Embedded MPC
 
-This code performs an efficient data-driven MPC calibration by tuning:
+This repository contains the Python code to reproduce the results of the paper "Efficient Calibration of Embedded MPC" by Marco Forgione, Dario Piga, and Alberto Bemporad.
+
+The code performs an efficient data-driven MPC calibration by tuning:
 
  * MPC weight matrices
  * MPC sampling time <a href="https://www.codecogs.com/eqnedit.php?latex=T_{\mathrm{s}}^{\mathrm{MPC}}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?T_{\mathrm{s}}^{\mathrm{MPC}}" title="T_{\mathrm{s}}^{\mathrm{MPC}}" /></a>
