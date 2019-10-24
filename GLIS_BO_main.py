@@ -15,7 +15,7 @@ import numba as nb
 
 if __name__ == '__main__':
 
-    np.random.seed(2)
+    np.random.seed(0)
     # initial random points
 
     # optimization parameters
@@ -26,9 +26,8 @@ if __name__ == '__main__':
     eps = 0.0  # Minimum allows distance between the las two observations
     eps_calc = 1.0
 
-    # method = 'BO'
-    method = "GLIS"
-    machine = 'PI' # PC or PI
+    method = "GLIS" # GLIS or BO
+    machine = 'PC' # PC or PI
 
 
     dict_x0 = {

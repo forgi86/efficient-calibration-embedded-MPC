@@ -14,10 +14,8 @@ import os
 from scipy.interpolate import interp1d
 if __name__ == '__main__':
 
-    algo = 'GLIS'
-    #algo = 'BO'
-
-    machine = 'PI' # PC or PI
+    algo = 'GLIS' # GLIS or BO
+    machine = 'PC' # PC or PI
     eps_calc = 1.0
     iter_max_plot = 500
 
@@ -124,26 +122,26 @@ if __name__ == '__main__':
 
     # In[Iteration plot]
 
-    Y = results['J_sample']
+    J = results['J_sample']
     Ts_MPC = simout['Ts_MPC']
 
-    Y_best_curr = np.zeros(np.shape(Y))
-    Y_best_val = Y[0]
+    J_best_curr = np.zeros(np.shape(J))
+    J_best_val = J[0]
     iter_best_val = 0
 
     fig, axes = plt.subplots(1, 1, figsize=(6, 4))
     axes = [axes]
-    for i in range(len(Y_best_curr)):
-        if Y[i] < Y_best_val:
-            Y_best_val = Y[i]
+    for i in range(len(J_best_curr)):
+        if J[i] < J_best_val:
+            J_best_val = J[i]
             iter_best_val = i
-        Y_best_curr[i] = Y_best_val
+        J_best_curr[i] = J_best_val
 
-    N = len(Y)
+    N = len(J)
     iter = np.arange(1, N + 1, dtype=np.int)
-    axes[0].plot(iter, Y, 'k*', label='Current test point')
+    axes[0].plot(iter, J, 'k*', label='Current test point')
     #    axes[0].plot(iter, Y_best_curr, 'r', label='Current best point')
-    axes[0].plot(iter, Y_best_val * np.ones(Y.shape), '-', label='Overall best point', color='red')
+    axes[0].plot(iter, J_best_val * np.ones(J.shape), '-', label='Overall best point', color='red')
     axes[0].set_xlabel("Iteration index n (-)")
     axes[0].set_ylabel(r"Performance cost $\tilde {J}^{\mathrm{cl}}$")
 
