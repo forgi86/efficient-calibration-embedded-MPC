@@ -3,13 +3,13 @@
 This code performs an efficient data-driven MPC calibration by tuning:
 
  * MPC weight matrices
- * MPC sampling time T_{s}^{MPC}
+ * MPC sampling time <a href="https://www.codecogs.com/eqnedit.php?latex=T_{\mathrm{s}}^{\mathrm{MPC}}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?T_{\mathrm{s}}^{\mathrm{MPC}}" title="T_{\mathrm{s}}^{\mathrm{MPC}}" /></a>
  * Prediction and control horizon
  * Kalman filter matrices
  * QP solver relative and absolute tolerances
 
-to optimize a closed-loop objective function J^{cl}, under the constraint that T_{calc}^{MPC} <= \eta T_{s}^{MPC} where T_{calc}^{MPC} is the maximum MPC time spent to solve the optimization problem.
-Satisfying this constraints means that the controller can run in real-time.
+to optimize a closed-loop objective function <a href="https://www.codecogs.com/eqnedit.php?latex=J^{cl}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?J^{cl}" title="J^{cl}" /></a>, under the constraint that <a href="https://www.codecogs.com/eqnedit.php?latex=T_{\mathrm{s}}^{\mathrm{MPC}}&space;\leq&space;\eta&space;T_{\mathrm{s}}^{\mathrm{MPC}}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?T_{\mathrm{calc}}^{\mathrm{MPC}}&space;\leq&space;\eta&space;T_{\mathrm{s}}^{\mathrm{MPC}}" title="T_{\mathrm{s}}^{\mathrm{MPC}} \leq \eta T_{\mathrm{s}}^{\mathrm{MPC}}" /></a> where <a href="https://www.codecogs.com/eqnedit.php?latex=T_{\mathrm{calc}}^{\mathrm{MPC}}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?T_{\mathrm{calc}}^{\mathrm{MPC}}" title="T_{\mathrm{calc}}^{\mathrm{MPC}}" /></a> is the (worst-case) time required to compute the MPC
+control low. This constraints guarantees that the controller can run in real-time.
 
 ## Main scripts: 
 
