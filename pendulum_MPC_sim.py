@@ -165,8 +165,8 @@ def simulate_pendulum_MPC(sim_options):
     uminus1 = np.array([0.0])     # input at time step negative one - used to penalize the first delta u at time instant 0. Could be the same as uref.
 
     # Constraints
-    xmin = np.array([-1.5, -100, -100, -100])
-    xmax = np.array([1.5,   100.0, 100, 100])
+    xmin = np.array([-1.0, -np.inf, -np.inf, -np.inf])
+    xmax = np.array([1.0,   np.inf, np.inf, np.inf])
 
     umin = np.array([-10])
     umax = np.array([10])
@@ -188,7 +188,7 @@ def simulate_pendulum_MPC(sim_options):
     # Emergency exit conditions
     
     EMERGENCY_STOP = False
-    EMERGENCY_POS = 2.0
+    EMERGENCY_POS = 1.1
     EMERGENCY_ANGLE = 30*DEG_TO_RAD
 
     K = MPCController(Ad,Bd,Np=Np,Nc=Nc,x0=x0,xref=xref_MPC,uminus1=uminus1,
@@ -208,7 +208,11 @@ def simulate_pendulum_MPC(sim_options):
     # Basic Kalman filter design
     Q_kal =  get_parameter(sim_options, 'Q_kal')
     R_kal = get_parameter(sim_options, 'R_kal')
-    L, P, W = kalman_design_simple(Ad, Bd, Cd, Dd, Q_kal, R_kal, type='predictor')
+    try:
+        L, P, W = kalman_design_simple(Ad, Bd, Cd, Dd, Q_kal, R_kal, type='predictor')
+    except:
+        EMERGENCY_STOP = True
+
     x0_est = x0
     KF = LinearStateEstimator(x0_est, Ad, Bd, Cd, Dd,L)
 
