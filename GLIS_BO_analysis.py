@@ -152,7 +152,7 @@ if __name__ == '__main__':
     axes[0].set_xlim((0, iter_max_plot))
     axes[0].set_ylim((-1, 25))
 
-    fig_name = f"ITER_{algo}_{machine}.pdf"
+    fig_name = f"ITER_{algo}_{machine}_{iter_max_plot:.0f}.pdf"
     fig_path = os.path.join(FIG_FOLDER, fig_name)
     fig.savefig(fig_path, bbox_inches='tight')
 
