@@ -56,7 +56,7 @@ pip install gpyopt
 
 If you find this project useful, we encourage you to
 
-* Star this repository
+* Star this repository :star: 
 * Cite the [paper](https://arxiv.org/pdf/1911.13021) 
 ```
 @misc{efficient2019,
