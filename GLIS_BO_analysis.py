@@ -14,8 +14,10 @@ import os
 from scipy.interpolate import interp1d
 if __name__ == '__main__':
 
+    matplotlib.rc('text', usetex=True)
+
     algo = 'GLIS' # GLIS or BO
-    machine = 'PC' # PC or PI
+    machine = 'PI' # PC or PI
     eps_calc = 1.0
     iter_max_plot = 500
 
@@ -65,7 +67,7 @@ if __name__ == '__main__':
     fig, axes = plt.subplots(3, 1, figsize=(8, 6))
 #    axes[0].plot(t, y_meas[:, 0], "r", label='p_meas')
     axes[0].plot(t_fast, x_fast[:, 0], "k", label='$p$')
-    axes[0].plot(t, y_ref[:, 0], "r--", label="$p^{ref}$", linewidth=2)
+    axes[0].plot(t, y_ref[:, 0], "r--", label="$p^{\mathrm{ref}}$", linewidth=2)
     axes[0].set_ylim(-0.2, 1.0)
     axes[0].set_ylabel("Position (m)")
 
@@ -75,7 +77,7 @@ if __name__ == '__main__':
     axes[1].set_ylim(-12, 12)
     axes[1].set_ylabel("Angle (deg)")
 
-    axes[2].plot(t, u[:, 0], 'k', label="u")
+    axes[2].plot(t, u[:, 0], 'k', label="$u$")
     #axes[2].plot(t, uref * np.ones(np.shape(t)), "r--", label="u_ref")
     axes[2].set_ylim(-8, 8)
     axes[2].set_ylabel("Force (N)")
@@ -92,23 +94,23 @@ if __name__ == '__main__':
     # MPC time check
     # In[MPC computation time ]
     fig, axes = plt.subplots(4, 1, figsize=(14, 10), sharex=True)
-    axes[0].plot(t, y_meas[:, 0], "r", label='p_meas')
-    axes[0].plot(t_fast, x_fast[:, 0], "k", label='p')
-    axes[0].step(t, y_ref[:, 0], "k--", where='post', label="p_ref")
+    axes[0].plot(t, y_meas[:, 0], "r", label='$p_{meas}$')
+    axes[0].plot(t_fast, x_fast[:, 0], "k", label='$p$')
+    axes[0].step(t, y_ref[:, 0], "k--", where='post', label="$p_{ref}$")
     axes[0].set_ylim(-0.2, 1.0)
     axes[0].set_xlabel("Simulation time (s)")
     axes[0].set_ylabel("Position (m)")
 
-    axes[1].step(t, t_calc[:, 0] * 1e3, "b", where='post', label='T_MPC')
+    axes[1].step(t, t_calc[:, 0] * 1e3, "b", where='post', label='$T_{MPC}$')
     axes[1].set_xlabel("Simulation time (s)")
     axes[1].set_ylabel("MPC time (ms)")
     axes[1].set_ylim(0, 40)
-    axes[2].step(t_fast[1:], t_int[1:, 0] * 1e3, "b", where='post', label='T_ODE')
+    axes[2].step(t_fast[1:], t_int[1:, 0] * 1e3, "b", where='post', label='$T_{ODE}$')
     axes[2].set_xlabel("Simulation time (s)")
     axes[2].set_ylabel("ODE time (ms)")
     axes[2].set_ylim(0, 2)
-    axes[3].step(t, u[:, 0], where='post', label="F")
-    axes[3].step(t_fast, u_fast[:, 0], where='post', label="F_d")
+    axes[3].step(t, u[:, 0], where='post', label="$F$")
+    axes[3].step(t_fast, u_fast[:, 0], where='post', label="$F_{d}$")
     axes[3].set_xlabel("Simulation time (s)")
     axes[3].set_ylabel("Force (N)")
 
@@ -142,7 +144,7 @@ if __name__ == '__main__':
     axes[0].plot(iter, J, 'k*', label='Current test point')
     #    axes[0].plot(iter, Y_best_curr, 'r', label='Current best point')
     axes[0].plot(iter, J_best_val * np.ones(J.shape), '-', label='Overall best point', color='red')
-    axes[0].set_xlabel("Iteration index n (-)")
+    axes[0].set_xlabel("Iteration index $n$ (-)")
     axes[0].set_ylabel(r"Performance cost $\tilde {J}^{\mathrm{cl}}$")
 
     for ax in axes:
