@@ -1,6 +1,6 @@
 # Efficient Calibration of Embedded MPC
 
-This repository contains the Python code to reproduce the results of the paper "Efficient Calibration of Embedded MPC" by Marco Forgione, Dario Piga, and Alberto Bemporad.
+This repository contains the Python code to reproduce the results of the paper [Efficient Calibration of Embedded MPC](https://arxiv.org/pdf/1911.13021) by Marco Forgione, Dario Piga, and Alberto Bemporad.
 
 The code performs an efficient data-driven MPC calibration by tuning:
 
@@ -51,4 +51,18 @@ conda install numpy scipy matplotlib
 pip install osqp
 pip install control
 pip install gpyopt
+```
+## Citing
+
+If you find this project useful, we encourage you to
+
+* Star this repository :star: 
+* Cite the [paper](https://arxiv.org/pdf/1911.13021) 
+```
+@misc{efficient2019,
+Author = {Forgione, Marco and Piga, Dario and Bemporad, Alberto},
+Title = {Efficient Calibration of Embedded MPC},
+Year = {2019},
+Eprint = {arXiv:1911.13021},
+}
 ```
