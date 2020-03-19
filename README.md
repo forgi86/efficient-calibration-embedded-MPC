@@ -61,7 +61,7 @@ If you find this project useful, we encourage you to
 ```
 @inproceedings{forgione2020efficient,
   title={Efficient Calibration of Embedded {MPC}},
-  author={Forgione, Marco and Piga, Dario, and Bemporad, Alberto},
+  author={Forgione, Marco and Piga, Dario and Bemporad, Alberto},
   booktitle={Proc. of the 21st IFAC World Congress 2020, Berlin, Germany, July 12-17 2020},
   year={2020}
 }
