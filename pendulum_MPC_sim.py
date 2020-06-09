@@ -131,7 +131,7 @@ def simulate_pendulum_MPC(sim_options):
     N_sim_imp = tau_F / Ts_fast * 20
     t_imp = np.arange(N_sim_imp) * Ts_fast
     t, y = control.impulse_response(Hud, t_imp)
-    y = y[0]
+    #y = y[0]
     std_tmp = np.sqrt(np.sum(y ** 2))  # np.sqrt(trapz(y**2,t))
     Hu = Hu / (std_tmp) * std_dF
 

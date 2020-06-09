@@ -1,0 +1,381 @@
+\documentclass{beamer}
+\usefonttheme[onlymath]{serif}
+\input{preamble}
+\definecolor{darkgreen}{RGB}{20,150,50}
+\definecolor{acq}{RGB}{119, 172, 48}
+\definecolor{true}{RGB}{162, 20, 47}
+\definecolor{surr}{RGB}{0, 114, 189}
+
+\begin{document}
+
+\begin{frame}
+  \titlepage
+\end{frame}
+
+\begin{frame}{Motivations}
+Calibration of \structure{model predictive controllers} is \alert{costly} and \alert{time-consuming}.\\
+One has to choose model, cost function weights, prediction/control horizon, design a state estimator, etc.
+%Typically, models are obtained through Physical modeling or Identification
+\vskip 1em
+The design is even more involved for \structure{embedded applications}, where the hardware is also a limit. Need to choose carefully:
+\begin{itemize}
+\item Solution strategy (QP solver?) 
+\item Low-level solver settings (e.g., tolerances)
+\item A \structure{feasible} MPC sampling time
+\end{itemize}
+%\vskip 1em
+%Requires \structure{knowledge} in control systems, numerical math, computer engineering + \structure{hands-on experience}.
+\vskip 1em
+In this paper, we introduce an approach to ease embedded MPC calibration based on \structure{global optimization} and repeated experiements.
+\end{frame}
+
+
+\begin{frame}{Control architecture}{Model Predictive Controller}
+\begin{figure}
+	\centering
+		\includegraphics[width=.3\textwidth]{img/MPCloop.pdf}
+\end{figure}
+
+Linear constrained MPC for a (non-linear) plant with model
+\begin{columns}
+\column{.3\textwidth}
+\begin{small}
+\begin{equation*}
+\begin{split}
+\dot x(t) &= f(x(t), u(t);\; \parcolor{\beta})\\
+y(t)  &=g(x(t); \; \parcolor{\beta}) %+\parcolor{D}u_t,
+\end{split}
+\end{equation*}
+\end{small}
+\column{.2\textwidth}
+$$\Rightarrow$$
+\column{.5\textwidth}
+\begin{small}
+\begin{equation*}
+\begin{split}
+x_{t+1}&={A}(\parcolor{\Ts}, \parcolor{\beta})x_t+{B}(\parcolor{\Ts}, \parcolor{\beta})u_t\\
+y_t &=C(\parcolor{\beta})x_t %+\parcolor{D}u_t,
+\end{split}
+\end{equation*}
+\end{small}
+\end{columns}
+input $u$ chosen on-line as the solution (applied in 
+{receding horizon}) of:
+\vskip -1.5em
+\begin{small}
+\begin{align*}
+&\min_{\left\{u_{t+k|t}\right\}_{k=1}^{\parcolor{N_c}}} \;\;\sum_{k=1}^{\parcolor{N_p}}  \norm{\hat y_{t+k|t}-\overline{y}_{t+k}}^2_{\parcolor{Q_y}}
+ + \norm{u_{t+k|k}\!-\!u_{t+k-1|t}}^2_{\parcolor{Q_{\Delta u}}}  \\ 
+&  \text{s.t. model equations + constraints on  $y$, $u$, $\Delta u$}    
+\end{align*}
+\end{small}
+%\vskip -1.5em
+%MPC control law computed on-line using a QP solver.% (OSQP, ADMM-based).
+\end{frame}
+
+\begin{frame}{Control architecture}{Design variables}
+The MPC design variables to be tuned are
+\begin{columns}[t]
+\column{.6\textwidth}
+\begin{itemize}
+\item Model parameters: $\parcolor{\beta}$
+\item MPC sampling time: $\parcolor{\Ts}$
+\item MPC cost function: $\parcolor{Q_y}, \parcolor{Q_{\Delta u}}, \parcolor{N_c},  \parcolor{N_p}$
+\end{itemize}
+\column{.4\textwidth}
+\vskip -1em
+\begin{figure}
+	\centering
+		\includegraphics[width=.75\textwidth]{img/MPCloop.pdf}
+\end{figure}
+\end{columns}
+\begin{itemize}
+\item MPC implementation: QP solver tolerances $\parcolor{\epsilon_{\rm abs}}, \parcolor{\epsilon_{\rm rel}}$
+\item State estimator: Kalman covariances $\parcolor{W_v}, \parcolor{W_w}$
+\end{itemize}
+%\vskip 1em
+%in order to: 
+%\begin{enumerate}
+%\item maximize closed-loop performance %objective $J$
+%\item ensure that the implemented MPC runs in real-time
+%\end{enumerate}
+%\vskip 1em
+%Note: closed-loop performance is not the MPC cost function!
+\end{frame}
+
+
+
+\begin{frame}{MPC calibration procedure}{Overview}
+In our optimization-based  MPC calibration, we  define
+\begin{itemize}
+\item Tunable \structure{design parameters} collected in a \parcolor{design vector $\theta$} $\in \Theta$.
+\item A closed-loop \structure{performance index $J$} defined in terms of measured input/outputs during the {calibration experiment}: $J = J(y_{1:T},u_{1:T};\;\parcolor{\theta})$
+\item An \structure{procedure} to perform \structure{calibration experiments} (or SIL simulations) representative of the intended closed-loop operation
+\end{itemize}
+\pause
+MPC calibration is seen as a \structure{global optimization} problem:
+\begin{align*}
+&\theta^{\rm opt} = \argmin_{\theta \in \Theta} J(y_{1:T},u_{1:T};\;{\theta})\\
+&  \text{s.t. } T_{\rm calc}^{\rm MPC}({\theta}) \leq \eta {\Ts} 
+\end{align*}
+each (noisy) \structure{function evaluation}  correspond to a \structure{calibration experiment}.\\
+Both $J$ and $T_{\rm calc}^{\rm MPC}$ (worst-case MPC computation time) are observed!
+%\vskip 1em
+%\pause
+%Problem is tackled using \structure{efficient} global optimization algorithms.
+\end{frame}
+
+\begin{frame}{Global Optimization Algorithm}{Overview}
+ Several global optimization algorithms exist:
+ \begin{itemize}
+  \item Response surface methods
+  \item Bayesian Optimization% (BO)
+  \item Genetic algorithms
+  \item Particle Swarm Optimization
+  \item \dots%Lipshitzian-based partitioning techniques
+  \end{itemize}  
+% \end{itemize}
+ \vskip .5em
+ \pause
+ Here, we adopt \structure{GLIS}: a method recently introduced in \cites{Bemporad, 2019}.
+ \begin{itemize}
+  \item Radial basis function \structure{surrogate} + inverse distance weighting (IDW) for \structure{exploration}
+  \item Performs better than BO on standard benchmarks, at a lower computational cost
+  %\item Matlab- and Python-based implementation of GLIS available
+ \end{itemize}
+\end{frame}
+
+\begin{frame}{GLIS Algorithm}{Surrogate function}
+
+\begin{columns}[t]
+ \column{.55\textwidth}
+  Goal: solve \structure{global optimization} problem:
+% \begin{align*}
+$$  \min_{\theta \in \Theta} J(\theta)$$
+%\\
+%&  \text{s.t. } \theta \in \Theta 
+%\end{align*}
+%\vskip -.5em
+\begin{enumerate}
+\item Collect ${n_{\rm in}}$ initial observations $\{(\theta_1, J_1), (\theta_2, J_2), \dots, (\theta_{n_{\rm in}}, J_{n_{\rm in}})\}$
+\item Build a \structure{surrogate function}
+\vskip -0.5em
+$$\hat J(\theta) = \sum_{i=1}^{n} \alpha_i \phi(\norm{\theta - \theta_i}_2 )$$
+\end{enumerate}
+ \column{.45\textwidth}
+ %\vskip -1.5em
+ 	\centering
+ 		True {\color{true} $J(\theta)$}, surrogate {\color{surr} $\hat{J}(\theta)$}
+ \begin{figure}
+		\includegraphics[width=.7\textwidth]{img/GLIS/surrogate.png}
+\end{figure}
+$ \phi = $ \text{radial basis function}\\
+\vskip .5em
+Example: $\phi(d) = \frac{1}{1 + (\epsilon d)^2}$
+\end{columns}
+\vskip 1em
+%Vector $\alpha$ solves $\hat J(\theta_i) = J_i,\; i=1,\dots,n\;\;$ (= linear system) 
+\pause
+\vskip 1em
+Minimizing $\hat J(\theta)$ to find $\theta_{n+1}$ may easily miss the global optimum! 
+\end{frame}
+
+\begin{frame}{GLIS Algorithm}{Exploration vs. Exploitation}
+\begin{columns}[t]
+ \column{.57\textwidth}
+\begin{enumerate}
+\setcounter{enumi}{2}
+\item Construct the IDW \structure{exploration function} 
+\begin{equation*}
+ z(\theta) = \frac{2}{\pi}\Delta F \tan^{-1}\left(\frac{1}{\sum_{i=1}^n w_i(\theta)} \right)
+\end{equation*}
+where $w_i(\theta) = \frac{e^{-\norm{\theta - \theta_i}^2}}{\norm{\theta - \theta_i}^2}$%{-\norm{x - x_i}}^2%}{1}$
+\item Optimize the \structure{acquisition function}:
+$$\theta_{n+1} = \arg \min_{\theta \in \Theta} \hat J(\theta) - \alert{\delta} z(x)$$
+\end{enumerate}
+ \column{.45\textwidth}
+ 	\centering
+ \begin{figure}
+	Exploration function {\color{acq}$z(\theta)$}
+		\includegraphics[width=.7\textwidth]{img/GLIS/acquisition.png}
+\end{figure}
+$\alert{\delta}$: exploitation vs.\\ exploration trade-off
+\end{columns}
+\vskip 1em
+to get the \structure{query point} $\theta_{n+1}$. Execute experiment with $\theta_{n+1}$, measure $J_{n+1}$.
+\pause
+\vskip 1em
+Iterate the procedure for $n+2, n+3 \dots$.  
+\end{frame}
+
+\begin{frame}{MPC Calibration Example}%{Cart-pole system}
+\begin{columns}
+\column{.48\textwidth}
+\centering
+Cart-pole system
+\begin{figure}
+    \includegraphics[width=.45\textwidth]{img/example/cart_pole.pdf}
+\end{figure}
+    \begin{itemize}
+     \item Input: force $F$ with \structure{fast disturbance} ($5~\text{rad/sec}$)
+     \item Output: noisy  position $p$%$ with white measurement noise
+     \item Objective: follow trajectory for $p$, keep $\phi$ small.
+     \end{itemize}
+\column{.54\textwidth}
+Optimization-based calibration of
+\begin{enumerate}
+ \item MPC sample time $T_{s}^{\rm MPC}$
+ \item MPC weights $Q_y$ and $Q_{\Delta u}$
+ \item Prediction and control horizon
+ \item Kalman filter covariance matrices
+ \item QP solver's abs. and rel. tolerances
+ \end{enumerate}
+
+\vskip 1em
+ $n_\theta=14$ design parameters optimized using $n=500$ iterations of GLIS
+
+ \begin{small}
+ \begin{equation*}
+ J =  \int_0^{T_{\rm exp}} |\overline{p}(t) - p(t)| +  30 |\phi(t)|\;dt 
+\end{equation*}
+\end{small}
+% \footnotesize
+% \url{https://github.com/forgi86/efficient-calibration-embedded-MPC.git}
+\end{columns}
+%\pause
+%\vskip 1em
+\pause
+ Python codes on-line, $100\%$ \structure{open source} (including all dependencies).\\
+\small
+\url{https://github.com/forgi86/efficient-calibration-embedded-MPC}
+\end{frame}
+
+\begin{frame}{MPC Calibration Example}%{Cart-pole system}
+\begin{columns}
+\column{.3\textwidth}
+\begin{figure}
+	\centering
+		%GLIS iterations on the PC
+		\includegraphics[width=.99\textwidth]{img/example/HIL_PC.pdf}
+\end{figure}
+\column{.2\textwidth}
+\centering
+\huge vs.
+\column{.3\textwidth}
+\begin{figure}
+		%GLIS iterations on the Raspberry PI
+	\centering
+    \includegraphics[width=.99\textwidth]{img/example/HIL_PI.pdf}
+\end{figure}
+\end{columns}
+\vskip 1em
+\begin{itemize}
+ \item An Intel i5 PC (left) vs. an ARM-based Raspberry PI 3 (right)
+ %\item On the same control problem, running the same Python code
+ \item PI is about 10 time slower than the PC for MPC computations
+ %\item Cart-pole simulated in the same Python code for simplicity \dots
+ %\item Could be used in a true HIL setup or a real system
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}{MPC Calibration Example}%{Cart-pole system}
+\begin{columns}
+\column{.5\textwidth}
+\begin{figure}
+	\centering
+		Optimized MPC on the PC
+		\includegraphics[width=.99\textwidth]{img/example/BEST_GLIS_PC.pdf}
+		$T_s^{\rm MPC} = 6$~ms
+\end{figure}
+\column{.5\textwidth}
+\begin{figure}
+	Optimized MPC on the Raspberry PI 
+	\centering
+    \includegraphics[width=.99\textwidth]{img/example/BEST_GLIS_PI.pdf}
+    $T_s^{\rm MPC} = 22$~ms
+\end{figure}
+\end{columns}
+\vskip 1em
+\begin{itemize}
+ \item Position and angle control tighter on the PC
+ \item Faster loop update on the PC $\Rightarrow$ more effective disturbance rejection
+ \item Calibration squeezes max performance out of the hardware!
+\end{itemize}
+\end{frame}
+
+\begin{frame}{MPC Calibration Example}%{Cart-pole system}
+\begin{columns}
+\column{.5\textwidth}
+\begin{figure}
+	\centering
+		GLIS iterations on the PC
+		\includegraphics[width=.99\textwidth]{img/example/ITER_GLIS_PC_500.pdf}
+\end{figure}
+\column{.5\textwidth}
+\begin{figure}
+		GLIS iterations on the Raspberry PI
+	\centering
+    \includegraphics[width=.99\textwidth]{img/example/ITER_GLIS_PI_500.pdf}
+\end{figure}
+\end{columns}
+\vskip 1em
+\begin{itemize}
+ \item High cost for interrupted tests/unfeasible design
+ \item For increasing $n$, more points have ``low'' cost
+ \item Experiments with high cost still appear for large $n$ (exploration)
+ \item Optimum on PC is slightly better than on the PI. Some configurations are only feasible on PC!
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Simulation Example}{Cart-pole system}
+Similar calibration results are obtained using Bayesian Optimization (BO).\\
+However, BO is a much heavier algorithm!
+\vskip -.5em
+ \begin{columns}
+\column{.5\textwidth}
+\begin{figure}
+	\centering
+		GLIS iterations on the PI
+		\includegraphics[width=.99\textwidth]{img/example/COMPUTATION_GLIS_PI.pdf}
+\end{figure}
+\column{.5\textwidth}
+\begin{figure}
+	BO iterations on the PI
+	\centering
+		\includegraphics[width=1\textwidth]{img/example/COMPUTATION_BO_PI.pdf}
+\end{figure}
+\end{columns}
+\begin{itemize}
+\item With GLIS, the overall computation time is dominated by function evaluations (= running MPC and simulating the system).
+%\item A lightweight algorithm like GLIS could be used for self-tuning on an embedded system!
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Conclusions}
+An approach for embedded MPC calibration approach based on global optimization and repeated experiments
+\begin{itemize}
+\item Higher- and lower-level settings tuned altogether to maximize performance, while keeping the design feasible
+\item Tested in simulation on two hardware platforms
+\end{itemize}
+\vskip 1em
+\pause
+Current/future works
+\begin{itemize}
+\item Application to {robotic systems}
+\item Preference-based MPC calibration
+\end{itemize}
+\end{frame}
+
+\begin{frame}{}{}
+\begin{center}
+\huge{\structure{Thank you.\\ Questions?}}
+\end{center}
+\end{frame}
+
+%\appendix
+%\newcounter{finalframe}
+%\setcounter{finalframe}{\value{framenumber}}
+%\setcounter{framenumber}{\value{finalframe}}
+	
+\end{document}
