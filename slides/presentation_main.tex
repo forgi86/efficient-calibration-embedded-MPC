@@ -116,7 +116,7 @@ In our optimization-based  MPC calibration, we  define
 MPC calibration is seen as a \structure{global optimization} problem:
 \begin{align*}
 &\theta^{\rm opt} = \argmin_{\theta \in \Theta} J(y_{1:T},u_{1:T};\;{\theta})\\
-&  \text{s.t. } T_{\rm calc}^{\rm MPC}({\theta}) \leq \eta {\Ts} 
+&  \text{s.t. } T_{\rm calc}^{\rm MPC}({\theta}) \leq {\Ts} 
 \end{align*}
 each (noisy) \structure{function evaluation}  correspond to a \structure{calibration experiment}.\\
 Both $J$ and $T_{\rm calc}^{\rm MPC}$ (worst-case MPC computation time) are observed!
@@ -126,7 +126,7 @@ Both $J$ and $T_{\rm calc}^{\rm MPC}$ (worst-case MPC computation time) are obse
 \end{frame}
 
 \begin{frame}{Global Optimization Algorithm}{Overview}
- Several global optimization algorithms exist:
+ Several \structure{derivative-free} global optimization algorithms exist:
  \begin{itemize}
   \item Response surface methods
   \item Bayesian Optimization% (BO)
@@ -191,7 +191,7 @@ Minimizing $\hat J(\theta)$ to find $\theta_{n+1}$ may easily miss the global op
 \end{equation*}
 where $w_i(\theta) = \frac{e^{-\norm{\theta - \theta_i}^2}}{\norm{\theta - \theta_i}^2}$%{-\norm{x - x_i}}^2%}{1}$
 \item Optimize the \structure{acquisition function}:
-$$\theta_{n+1} = \arg \min_{\theta \in \Theta} \hat J(\theta) - \alert{\delta} z(x)$$
+$$\theta_{n+1} = \arg \min_{\theta \in \Theta} \hat J(\theta) - \alert{\delta} z(\theta)$$
 \end{enumerate}
  \column{.45\textwidth}
  	\centering
@@ -324,7 +324,7 @@ Optimization-based calibration of
  \item High cost for interrupted tests/unfeasible design
  \item For increasing $n$, more points have ``low'' cost
  \item Experiments with high cost still appear for large $n$ (exploration)
- \item Optimum on PC is slightly better than on the PI. Some configurations are only feasible on PC!
+ %\item Optimum on PC is slightly better than on the PI. Some configurations are only feasible on PC!
 \end{itemize}
 \end{frame}
 
@@ -355,7 +355,7 @@ However, BO is a much heavier algorithm!
 \begin{frame}{Conclusions}
 An approach for embedded MPC calibration approach based on global optimization and repeated experiments
 \begin{itemize}
-\item Higher- and lower-level settings tuned altogether to maximize performance, while keeping the design feasible
+\item Higher- and lower-level tuning knobs jointly optimized for performance, while keeping the design feasible for real-time implementation.
 \item Tested in simulation on two hardware platforms
 \end{itemize}
 \vskip 1em
@@ -369,7 +369,11 @@ Current/future works
 
 \begin{frame}{}{}
 \begin{center}
-\huge{\structure{Thank you.\\ Questions?}}
+\huge{\structure{Thank you.\\ Questions?}}\\
+\vskip 1em
+\begin{small}
+\texttt{marco.forgione@idsia.ch}
+\end{small}
 \end{center}
 \end{frame}
 
