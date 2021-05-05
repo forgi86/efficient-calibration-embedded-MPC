@@ -142,7 +142,7 @@ def simulate_pendulum_MPC(sim_options):
     N_sim_d = N_sim_d + N_skip
     e = np.random.randn(N_sim_d)
     te = np.arange(N_sim_d) * Ts_fast
-    _, d, _ = control.forced_response(Hu, te, e)
+    _, d = control.forced_response(Hu, te, e, return_x=False)
     d_fast = d[N_skip:]
     #td = np.arange(len(d)) * Ts_fast
     
@@ -214,7 +214,7 @@ def simulate_pendulum_MPC(sim_options):
         EMERGENCY_STOP = True
 
     x0_est = x0
-    KF = LinearStateEstimator(x0_est, Ad, Bd, Cd, Dd,L)
+    KF = LinearStateEstimator(x0_est, Ad, Bd, Cd, Dd, L)
 
     # Simulate in closed loop
     len_sim = get_parameter(sim_options, 'len_sim')  # simulation length (s)

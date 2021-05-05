@@ -74,17 +74,17 @@ def kalman_design_simple(A, B, C, D, Qn, Rn, type='predictor'):
      \hat y_{k}   = Cx_k + Du_k
     """
 
-    P,W,K, = control.dare(np.transpose(A), np.transpose(C), Qn, Rn)
+    P, W, K, = control.dare(np.transpose(A), np.transpose(C), Qn, Rn)
 #    L = np.transpose(K) # Kalman gain
 
     if type == 'filter':
-        L = P@np.transpose(C) @ sp.linalg.basic.inv(C@P@np.transpose(C)+Rn)
+        L = P @ np.transpose(C) @ sp.linalg.basic.inv(C @ P @ np.transpose(C) + Rn)
     elif type == 'predictor':
-        L = A@P@np.transpose(C) @ sp.linalg.basic.inv(C@P@np.transpose(C)+Rn)
+        L = A @ P @ np.transpose(C) @ sp.linalg.basic.inv(C @ P @np.transpose(C) + Rn)
     else:
         raise ValueError("Unknown Kalman design type. Specify either filter or predictor!")
 
-    return L,P,W
+    return L, P, W
 
 
 class LinearStateEstimator:
@@ -102,7 +102,7 @@ class LinearStateEstimator:
         self.nu = __second_dim__(B) # number of controlled inputs
         self.ny = __first_dim__(C)
 
-    def out_y(self,u):
+    def out_y(self, u):
         return self.y
 
     def predict(self, u):
@@ -131,7 +131,7 @@ class LinearStateEstimator:
         for i in range(Np):
             u_tmp = u_seq[i]
             y[i,:] = self.C @ x_tmp + self.D @ u_tmp
-            x_tmp = self.A @x_tmp + self.B @ u_tmp
+            x_tmp = self.A @ x_tmp + self.B @ u_tmp
 
         #y[Np] = self.C @ x_tmp + self.D @ u_tmp # not really true for D. Here it is 0 anyways
         return y
