@@ -206,7 +206,7 @@ def simulate_pendulum_MPC(sim_options):
             EMERGENCY_STOP = True
         
     # Basic Kalman filter design
-    Q_kal =  get_parameter(sim_options, 'Q_kal')
+    Q_kal = get_parameter(sim_options, 'Q_kal')
     R_kal = get_parameter(sim_options, 'R_kal')
     try:
         L, P, W = kalman_design_simple(Ad, Bd, Cd, Dd, Q_kal, R_kal, type='predictor')

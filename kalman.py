@@ -57,6 +57,8 @@ def kalman_design(A, B, C, D, Qn, Rn, Nn=None, type='predictor'):
     Rb = (Rb+np.transpose(Rb))/2
 
     P,W,K, = control.dare(np.transpose(A), np.transpose(C), Qb, Rb, Nb, np.transpose(E))
+    P = np.asarray(P)
+    K = np.asarray(K)
 
     L = np.transpose(K) # Kalman gain
     return L,P,W
@@ -76,6 +78,8 @@ def kalman_design_simple(A, B, C, D, Qn, Rn, type='predictor'):
 
     P, W, K, = control.dare(np.transpose(A), np.transpose(C), Qn, Rn)
 #    L = np.transpose(K) # Kalman gain
+    P = np.asarray(P)
+    W = np.asarray(W)
 
     if type == 'filter':
         L = P @ np.transpose(C) @ sp.linalg.basic.inv(C @ P @ np.transpose(C) + Rn)
